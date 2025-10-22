@@ -1,3 +1,5 @@
+import type { CharacterId, ModeId } from "@/lib/constants/game-config";
+
 /**
  * 会話メッセージ
  */
@@ -13,6 +15,8 @@ export type Message = {
  */
 export type GameSession = {
   sessionId: string;
+  mode: ModeId;
+  character: CharacterId;
   currentTurn: number;
   maxTurns: number;
   conversationHistory: Message[];
@@ -48,6 +52,8 @@ export type FinalResult = {
  */
 export type MVPPlayHistory = {
   sessionId: string;
+  mode: ModeId;
+  character: CharacterId;
   score: number; // 0-100
   playedAt: string; // ISO 8601
 };

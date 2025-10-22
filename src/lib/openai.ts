@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import type { Message } from "@/types/game";
+import type { Character } from "@/lib/constants/game-config";
 
 // OpenAIクライアント初期化
 const openai = new OpenAI({
@@ -7,34 +8,35 @@ const openai = new OpenAI({
 });
 
 const MODEL = "gpt-5-nano";
-const CHARACTER_NAME = "真面目くん";
-const CHARACTER_DESCRIPTION = "真面目で丁寧な口調で話す友達";
 
 /**
  * AI発言を生成
  * @param playerMessage プレイヤーの発言（初回はnull）
+ * @param character キャラクター設定
  * @param conversationHistory 会話履歴
  * @returns AI発言
  */
 export async function generateAIMessage(
   playerMessage: string | null,
+  character: Character,
   conversationHistory: Message[],
 ): Promise<string> {
   console.log("[generateAIMessage] 関数開始", {
     playerMessage,
+    character: character.id,
     historyLength: conversationHistory.length,
   });
 
   const systemPrompt = `
-あなたは${CHARACTER_NAME}です。
-性格: ${CHARACTER_DESCRIPTION}
+あなたは${character.name}です。
+性格: ${character.personality}
 
 【会話のルール】
-1. 友達として自然な雑談をしてください
+1. ${character.responseStyle}
 2. 50文字以内で返答してください
-3. 絵文字は控えめに（0-1個）
+3. 絵文字の使用は自然な範囲で（キャラクターに合わせて）
 4. 相手が返答しやすいように、時々質問も入れてください
-5. 真面目で丁寧な口調を保ってください
+5. キャラクターの性格を保ってください
 `;
 
   const messages: OpenAI.ChatCompletionMessageParam[] = [
@@ -156,22 +158,26 @@ ${playerMessage}
  * @param averageScore 平均スコア
  * @param averageSpeedScore 平均反応速度
  * @param averageQualityScore 平均会話の質
+ * @param character キャラクター設定
  * @returns AI総評
  */
 export async function generateFinalComment(
   averageScore: number,
   averageSpeedScore: number,
   averageQualityScore: number,
+  character: Character,
 ): Promise<string> {
   console.log("[generateFinalComment] 関数開始", {
     averageScore,
     averageSpeedScore,
     averageQualityScore,
+    character: character.id,
   });
 
   const systemPrompt = `
-あなたは${CHARACTER_NAME}として、プレイヤーの会話を評価してコメントします。
-性格: ${CHARACTER_DESCRIPTION}
+あなたは${character.name}として、プレイヤーの会話を評価してコメントします。
+性格: ${character.personality}
+返答スタイル: ${character.responseStyle}
 
 以下の評価結果に基づき、2-3文で簡潔にコメントしてください。
 

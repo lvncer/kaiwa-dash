@@ -1,15 +1,20 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useRef, useState } from "react";
 import type { Message, TurnScore } from "@/types/game";
+import type { CharacterId, ModeId } from "@/lib/constants/game-config";
 import { evaluateTurn, startMVPSession } from "@/app/actions/game";
 
 const MAX_TURNS = 5;
 const TIME_LIMIT = 30; // 秒
 
-export default function PlayPage() {
+function PlayContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const mode = searchParams.get("mode") as ModeId | null;
+  const character = searchParams.get("character") as CharacterId | null;
 
   // セッション情報
   const [sessionId, setSessionId] = useState<string>("");
@@ -37,13 +42,20 @@ export default function PlayPage() {
 
   // 初回セッション開始
   useEffect(() => {
+    if (!mode || !character) {
+      alert("モードとキャラクターが指定されていません");
+      router.push("/select");
+      return;
+    }
     initializeSession();
   }, []);
 
   const initializeSession = async () => {
+    if (!mode || !character) return;
+
     try {
       const { sessionId: newSessionId, firstMessage } =
-        await startMVPSession();
+        await startMVPSession({ mode, character });
 
       setSessionId(newSessionId);
 
@@ -127,6 +139,7 @@ export default function PlayPage() {
           playerMessage: messageToSend,
           responseTime,
           conversationHistory: newHistory,
+          character: character!,
         });
 
       // スコアを保存
@@ -163,7 +176,7 @@ export default function PlayPage() {
         // ゲーム終了 → リザルト画面へ
         setTimeout(() => {
           router.push(
-            `/result?sessionId=${sessionId}&scores=${JSON.stringify([...turnScores, score])}`,
+            `/result?sessionId=${sessionId}&mode=${mode}&character=${character}&scores=${JSON.stringify([...turnScores, score])}`,
           );
         }, 2000);
       }
@@ -204,6 +217,7 @@ export default function PlayPage() {
           playerMessage: playerMessage.content,
           responseTime,
           conversationHistory: newHistory,
+          character: character!,
         });
 
       // スコアを保存
@@ -240,7 +254,7 @@ export default function PlayPage() {
         // ゲーム終了 → リザルト画面へ
         setTimeout(() => {
           router.push(
-            `/result?sessionId=${sessionId}&scores=${JSON.stringify([...turnScores, score])}`,
+            `/result?sessionId=${sessionId}&mode=${mode}&character=${character}&scores=${JSON.stringify([...turnScores, score])}`,
           );
         }, 2000);
       }
@@ -353,6 +367,14 @@ export default function PlayPage() {
         </div>
       </form>
     </div>
+  );
+}
+
+export default function PlayPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">読み込み中...</div>}>
+      <PlayContent />
+    </Suspense>
   );
 }
 

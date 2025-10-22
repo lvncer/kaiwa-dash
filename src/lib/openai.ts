@@ -67,7 +67,6 @@ export async function generateAIMessage(
     const response = await openai.chat.completions.create({
       model: MODEL,
       messages,
-      max_completion_tokens: 100,
     });
 
     console.log("[generateAIMessage] API呼び出し成功", {
@@ -136,7 +135,6 @@ ${playerMessage}
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
-      max_completion_tokens: 10,
     });
 
     const content = response.choices[0].message.content?.trim() || "50";
@@ -202,7 +200,6 @@ export async function generateFinalComment(
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
-      max_completion_tokens: 150,
     });
 
     const comment =

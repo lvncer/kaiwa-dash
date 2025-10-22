@@ -106,6 +106,7 @@ export async function finalizeMVPSession(input: {
   qualityScores: number[];
   totalScores: number[];
   character: CharacterId;
+  conversationHistory: Message[];
 }): Promise<{
   averageScore: number;
   averageSpeedScore: number;
@@ -116,9 +117,10 @@ export async function finalizeMVPSession(input: {
     sessionId: input.sessionId,
     turnsCount: input.totalScores.length,
     character: input.character,
+    historyLength: input.conversationHistory.length,
   });
 
-  const { speedScores, qualityScores, totalScores, character } = input;
+  const { speedScores, qualityScores, totalScores, character, conversationHistory } = input;
 
   // 平均スコア計算
   const averageScore = Math.round(
@@ -141,6 +143,7 @@ export async function finalizeMVPSession(input: {
     averageSpeedScore,
     averageQualityScore,
     characterData,
+    conversationHistory,
   );
 
   console.log("[finalizeMVPSession] セッション終了処理完了", {

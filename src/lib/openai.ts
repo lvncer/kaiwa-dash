@@ -159,6 +159,7 @@ ${playerMessage}
  * @param averageSpeedScore 平均反応速度
  * @param averageQualityScore 平均会話の質
  * @param character キャラクター設定
+ * @param conversationHistory 会話履歴
  * @returns AI総評
  */
 export async function generateFinalComment(
@@ -166,26 +167,35 @@ export async function generateFinalComment(
   averageSpeedScore: number,
   averageQualityScore: number,
   character: Character,
+  conversationHistory: Message[],
 ): Promise<string> {
   console.log("[generateFinalComment] 関数開始", {
     averageScore,
     averageSpeedScore,
     averageQualityScore,
     character: character.id,
+    historyLength: conversationHistory.length,
   });
+
+  // 会話履歴を整形
+  const conversationText = conversationHistory
+    .map((msg) => `${msg.sender === "ai" ? character.name : "あなた"}: ${msg.content}`)
+    .join("\n");
 
   const systemPrompt = `
 あなたは${character.name}として、プレイヤーの会話を評価してコメントします。
 性格: ${character.personality}
 返答スタイル: ${character.responseStyle}
 
-以下の評価結果に基づき、2-3文で簡潔にコメントしてください。
+以下の評価結果と実際の会話内容に基づき、詳細な考察を含めて評価してください。
 
 【コメントのルール】
-1. ポジティブな点を先に述べる
-2. 改善点を1つだけ優しく指摘
-3. 真面目で丁寧な口調を保つ
-4. 60文字以内に収める
+1. 会話の具体的な内容に言及する（どの発言が良かったか、印象的だったか）
+2. 良かった点を2-3個具体的に挙げる
+3. 改善できる点を1-2個優しく指摘する
+4. なぜそう評価したのか、理由や考察を含める
+5. キャラクターの口調を保ちながら、親しみやすく
+6. 150-200文字程度で、読みやすい長さに
 `;
 
   const userPrompt = `
@@ -193,6 +203,12 @@ export async function generateFinalComment(
 - 総合スコア: ${averageScore}点
 - 反応速度: ${averageSpeedScore}点
 - 会話の質: ${averageQualityScore}点
+
+【実際の会話】
+${conversationText}
+
+上記の会話を振り返って、プレイヤーの会話スキルを具体的に評価してください。
+どの発言が良かったか、どう改善できるかを詳しく教えてあげてください。
 
 コメント:
 `;

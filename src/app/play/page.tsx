@@ -77,6 +77,8 @@ export default function PlayPage() {
       if (remaining <= 0) {
         setRemainingTime(0);
         stopTimer();
+        // タイムアウト時に自動送信
+        handleTimeoutSubmit();
       } else {
         setRemainingTime(remaining);
       }
@@ -90,6 +92,86 @@ export default function PlayPage() {
       timerIntervalRef.current = null;
     }
     setIsTimerActive(false);
+  };
+
+  // タイムアウト時の自動送信
+  const handleTimeoutSubmit = async () => {
+    if (isLoading || !isTimerActive) return;
+
+    console.log("[handleTimeoutSubmit] タイムアウトで自動送信", {
+      inputMessage,
+      currentTurn,
+    });
+
+    const responseTime = TIME_LIMIT;
+    const messageToSend = inputMessage.trim() || "（タイムアウト）";
+
+    setIsLoading(true);
+
+    try {
+      // プレイヤーのメッセージを追加
+      const playerMessage: Message = {
+        id: crypto.randomUUID(),
+        sender: "player",
+        content: messageToSend,
+        timestamp: new Date(),
+      };
+
+      const newHistory = [...conversationHistory, playerMessage];
+      setConversationHistory(newHistory);
+      setInputMessage("");
+
+      // 評価実行
+      const { speedScore, qualityScore, totalScore, nextMessage } =
+        await evaluateTurn({
+          playerMessage: messageToSend,
+          responseTime,
+          conversationHistory: newHistory,
+        });
+
+      // スコアを保存
+      const score: TurnScore = {
+        turnNumber: currentTurn,
+        speedScore,
+        qualityScore,
+        totalScore,
+        responseTime,
+      };
+
+      setTurnScores([...turnScores, score]);
+      setCurrentTurnScore(score);
+
+      // 次のターンへ
+      if (currentTurn < MAX_TURNS) {
+        // AIメッセージを追加
+        const aiMessage: Message = {
+          id: crypto.randomUUID(),
+          sender: "ai",
+          content: nextMessage,
+          timestamp: new Date(),
+        };
+
+        setConversationHistory([...newHistory, aiMessage]);
+        setCurrentTurn(currentTurn + 1);
+
+        // 少し待ってからタイマー再開
+        setTimeout(() => {
+          setCurrentTurnScore(null);
+          startTimer();
+        }, 2000);
+      } else {
+        // ゲーム終了 → リザルト画面へ
+        setTimeout(() => {
+          router.push(
+            `/result?sessionId=${sessionId}&scores=${JSON.stringify([...turnScores, score])}`,
+          );
+        }, 2000);
+      }
+    } catch (error) {
+      console.error("Failed to evaluate turn:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // 返答送信

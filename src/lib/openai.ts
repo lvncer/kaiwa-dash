@@ -57,7 +57,6 @@ export async function generateAIMessage(
     const response = await openai.chat.completions.create({
       model: MODEL,
       messages,
-      temperature: 0.8,
       max_completion_tokens: 100,
     });
 
@@ -115,7 +114,6 @@ ${playerMessage}
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
-      temperature: 0.3, // 評価の一貫性を保つ
       max_completion_tokens: 10,
     });
 
@@ -172,7 +170,6 @@ export async function generateFinalComment(
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
-      temperature: 0.7,
       max_completion_tokens: 150,
     });
 

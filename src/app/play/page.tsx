@@ -154,16 +154,16 @@ function PlayContent() {
       setTurnScores([...turnScores, score]);
       setCurrentTurnScore(score);
 
+      // AIメッセージを作成
+      const aiMessage: Message = {
+        id: crypto.randomUUID(),
+        sender: "ai",
+        content: nextMessage,
+        timestamp: new Date(),
+      };
+
       // 次のターンへ
       if (currentTurn < MAX_TURNS) {
-        // AIメッセージを追加
-        const aiMessage: Message = {
-          id: crypto.randomUUID(),
-          sender: "ai",
-          content: nextMessage,
-          timestamp: new Date(),
-        };
-
         setConversationHistory([...newHistory, aiMessage]);
         setCurrentTurn(currentTurn + 1);
 
@@ -175,6 +175,13 @@ function PlayContent() {
       } else {
         // ゲーム終了 → リザルト画面へ
         setTimeout(() => {
+          // 会話履歴を一時保存（5ターン目のAI返答も含む）
+          const finalHistory = [...newHistory, aiMessage];
+          localStorage.setItem(
+            `conversation-${sessionId}`,
+            JSON.stringify(finalHistory),
+          );
+
           router.push(
             `/result?sessionId=${sessionId}&mode=${mode}&character=${character}&scores=${JSON.stringify([...turnScores, score])}`,
           );
@@ -232,16 +239,16 @@ function PlayContent() {
       setTurnScores([...turnScores, score]);
       setCurrentTurnScore(score);
 
+      // AIメッセージを作成
+      const aiMessage: Message = {
+        id: crypto.randomUUID(),
+        sender: "ai",
+        content: nextMessage,
+        timestamp: new Date(),
+      };
+
       // 次のターンへ
       if (currentTurn < MAX_TURNS) {
-        // AIメッセージを追加
-        const aiMessage: Message = {
-          id: crypto.randomUUID(),
-          sender: "ai",
-          content: nextMessage,
-          timestamp: new Date(),
-        };
-
         setConversationHistory([...newHistory, aiMessage]);
         setCurrentTurn(currentTurn + 1);
 
@@ -253,6 +260,13 @@ function PlayContent() {
       } else {
         // ゲーム終了 → リザルト画面へ
         setTimeout(() => {
+          // 会話履歴を一時保存（5ターン目のAI返答も含む）
+          const finalHistory = [...newHistory, aiMessage];
+          localStorage.setItem(
+            `conversation-${sessionId}`,
+            JSON.stringify(finalHistory),
+          );
+
           router.push(
             `/result?sessionId=${sessionId}&mode=${mode}&character=${character}&scores=${JSON.stringify([...turnScores, score])}`,
           );

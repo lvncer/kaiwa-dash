@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
-import type { TurnScore } from "@/types/game";
+import type { Message, TurnScore } from "@/types/game";
 import type { CharacterId, ModeId } from "@/lib/constants/game-config";
 import { finalizeMVPSession } from "@/app/actions/game";
 import { savePlayHistory } from "@/lib/storage";
@@ -39,6 +39,15 @@ function ResultContent() {
 
       const turnScores: TurnScore[] = JSON.parse(scoresParam);
 
+      // 会話履歴を取得
+      const conversationHistoryJson = localStorage.getItem(`conversation-${sessionIdParam}`);
+      const conversationHistory: Message[] = conversationHistoryJson 
+        ? JSON.parse(conversationHistoryJson) 
+        : [];
+
+      // 使用後は削除
+      localStorage.removeItem(`conversation-${sessionIdParam}`);
+
       // スコア配列を作成
       const speedScores = turnScores.map((s) => s.speedScore);
       const qualityScores = turnScores.map((s) => s.qualityScore);
@@ -51,6 +60,7 @@ function ResultContent() {
         qualityScores,
         totalScores,
         character,
+        conversationHistory,
       });
 
       setAverageScore(result.averageScore);

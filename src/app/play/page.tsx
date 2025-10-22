@@ -6,7 +6,7 @@ import type { Message, TurnScore } from "@/types/game";
 import { evaluateTurn, startMVPSession } from "@/app/actions/game";
 
 const MAX_TURNS = 5;
-const TIME_LIMIT = 5; // 秒
+const TIME_LIMIT = 30; // 秒
 
 export default function PlayPage() {
   const router = useRouter();

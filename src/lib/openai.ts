@@ -20,6 +20,11 @@ export async function generateAIMessage(
   playerMessage: string | null,
   conversationHistory: Message[],
 ): Promise<string> {
+  console.log("[generateAIMessage] 関数開始", {
+    playerMessage,
+    historyLength: conversationHistory.length,
+  });
+
   const systemPrompt = `
 あなたは${CHARACTER_NAME}です。
 性格: ${CHARACTER_DESCRIPTION}
@@ -54,15 +59,25 @@ export async function generateAIMessage(
   }
 
   try {
+    console.log("[generateAIMessage] API呼び出し開始", {
+      model: MODEL,
+      messagesCount: messages.length,
+    });
+
     const response = await openai.chat.completions.create({
       model: MODEL,
       messages,
       max_completion_tokens: 100,
     });
 
+    console.log("[generateAIMessage] API呼び出し成功", {
+      content: response.choices[0].message.content,
+      finishReason: response.choices[0].finish_reason,
+    });
+
     return response.choices[0].message.content?.trim() || "...";
   } catch (error) {
-    console.error("AI message generation failed:", error);
+    console.error("[generateAIMessage] AI message generation failed:", error);
     return "ごめん、ちょっと考え中...";
   }
 }
@@ -77,6 +92,11 @@ export async function evaluateQuality(
   playerMessage: string,
   aiMessage: string,
 ): Promise<number> {
+  console.log("[evaluateQuality] 関数開始", {
+    playerMessageLength: playerMessage.length,
+    aiMessageLength: aiMessage.length,
+  });
+
   const systemPrompt = `
 あなたは会話の質を評価する専門家です。
 プレイヤーの返答を以下の観点から評価し、0-100点のスコアを返してください。
@@ -108,6 +128,8 @@ ${playerMessage}
 `;
 
   try {
+    console.log("[evaluateQuality] API呼び出し開始");
+
     const response = await openai.chat.completions.create({
       model: MODEL,
       messages: [
@@ -120,10 +142,12 @@ ${playerMessage}
     const content = response.choices[0].message.content?.trim() || "50";
     const score = Number.parseInt(content, 10);
 
+    console.log("[evaluateQuality] API呼び出し成功", { content, score });
+
     // 0-100に正規化
     return Math.max(0, Math.min(100, Number.isNaN(score) ? 50 : score));
   } catch (error) {
-    console.error("Quality evaluation failed:", error);
+    console.error("[evaluateQuality] Quality evaluation failed:", error);
     // フォールバック: 基本スコアを返す
     return 50;
   }
@@ -141,6 +165,12 @@ export async function generateFinalComment(
   averageSpeedScore: number,
   averageQualityScore: number,
 ): Promise<string> {
+  console.log("[generateFinalComment] 関数開始", {
+    averageScore,
+    averageSpeedScore,
+    averageQualityScore,
+  });
+
   const systemPrompt = `
 あなたは${CHARACTER_NAME}として、プレイヤーの会話を評価してコメントします。
 性格: ${CHARACTER_DESCRIPTION}
@@ -164,6 +194,8 @@ export async function generateFinalComment(
 `;
 
   try {
+    console.log("[generateFinalComment] API呼び出し開始");
+
     const response = await openai.chat.completions.create({
       model: MODEL,
       messages: [
@@ -173,12 +205,15 @@ export async function generateFinalComment(
       max_completion_tokens: 150,
     });
 
-    return (
+    const comment =
       response.choices[0].message.content?.trim() ||
-      "お疲れ様でした。良い会話でしたね。"
-    );
+      "お疲れ様でした。良い会話でしたね。";
+
+    console.log("[generateFinalComment] API呼び出し成功", { comment });
+
+    return comment;
   } catch (error) {
-    console.error("Comment generation failed:", error);
+    console.error("[generateFinalComment] Comment generation failed:", error);
     return "お疲れ様でした。良い会話でしたね。";
   }
 }

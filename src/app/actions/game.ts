@@ -16,8 +16,12 @@ export async function startMVPSession(): Promise<{
   sessionId: string;
   firstMessage: string;
 }> {
+  console.log("[startMVPSession] セッション開始");
   const sessionId = crypto.randomUUID();
+  console.log("[startMVPSession] セッションID生成:", sessionId);
+
   const firstMessage = await generateAIMessage(null, []);
+  console.log("[startMVPSession] 初回メッセージ生成完了:", firstMessage);
 
   return { sessionId, firstMessage };
 }
@@ -37,6 +41,12 @@ export async function evaluateTurn(input: {
   totalScore: number;
   nextMessage: string;
 }> {
+  console.log("[evaluateTurn] ターン評価開始", {
+    playerMessage: input.playerMessage,
+    responseTime: input.responseTime,
+    historyLength: input.conversationHistory.length,
+  });
+
   const { playerMessage, responseTime, conversationHistory } = input;
 
   // 直前のAIメッセージを取得
@@ -48,7 +58,7 @@ export async function evaluateTurn(input: {
   // 並列処理: 評価 + 次のAI発言生成
   const [speedScore, qualityScore, nextMessage] = await Promise.all([
     // 反応速度評価（同期処理だがPromiseでラップ）
-    Promise.resolve(calculateSpeedScore(responseTime, 5)),
+    Promise.resolve(calculateSpeedScore(responseTime, 30)),
     // 会話の質評価
     evaluateQuality(playerMessage, lastAIMessage),
     // 次のAI発言生成
@@ -57,6 +67,13 @@ export async function evaluateTurn(input: {
 
   // 総合スコア計算
   const totalScore = calculateFinalScore(speedScore, qualityScore);
+
+  console.log("[evaluateTurn] 評価完了", {
+    speedScore: Math.round(speedScore),
+    qualityScore: Math.round(qualityScore),
+    totalScore,
+    nextMessagePreview: nextMessage.substring(0, 20),
+  });
 
   return {
     speedScore: Math.round(speedScore),
@@ -82,6 +99,11 @@ export async function finalizeMVPSession(input: {
   averageQualityScore: number;
   comment: string;
 }> {
+  console.log("[finalizeMVPSession] セッション終了処理開始", {
+    sessionId: input.sessionId,
+    turnsCount: input.totalScores.length,
+  });
+
   const { speedScores, qualityScores, totalScores } = input;
 
   // 平均スコア計算
@@ -103,6 +125,13 @@ export async function finalizeMVPSession(input: {
     averageSpeedScore,
     averageQualityScore,
   );
+
+  console.log("[finalizeMVPSession] セッション終了処理完了", {
+    averageScore,
+    averageSpeedScore,
+    averageQualityScore,
+    commentPreview: comment.substring(0, 30),
+  });
 
   return {
     averageScore,

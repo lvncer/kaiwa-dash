@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import type { TurnScore } from "@/types/game";
+import type { CharacterId, ModeId } from "@/lib/constants/game-config";
 import { finalizeMVPSession } from "@/app/actions/game";
 import { savePlayHistory } from "@/lib/storage";
 
@@ -25,9 +26,12 @@ function ResultContent() {
     try {
       const sessionIdParam = searchParams.get("sessionId");
       const scoresParam = searchParams.get("scores");
+      const mode = searchParams.get("mode") as ModeId | null;
+      const character = searchParams.get("character") as CharacterId | null;
 
-      if (!sessionIdParam || !scoresParam) {
+      if (!sessionIdParam || !scoresParam || !mode || !character) {
         console.error("Missing parameters");
+        router.push("/");
         return;
       }
 
@@ -46,6 +50,7 @@ function ResultContent() {
         speedScores,
         qualityScores,
         totalScores,
+        character,
       });
 
       setAverageScore(result.averageScore);
@@ -56,6 +61,8 @@ function ResultContent() {
       // ローカルストレージに保存
       savePlayHistory({
         sessionId: sessionIdParam,
+        mode,
+        character,
         score: result.averageScore,
         playedAt: new Date().toISOString(),
       });
@@ -67,7 +74,7 @@ function ResultContent() {
   };
 
   const handlePlayAgain = () => {
-    router.push("/play");
+    router.push("/select");
   };
 
   const handleGoHome = () => {

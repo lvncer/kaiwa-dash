@@ -58,7 +58,7 @@ export async function generateAIMessage(
       model: MODEL,
       messages,
       temperature: 0.8,
-      max_tokens: 100,
+      max_completion_tokens: 100,
     });
 
     return response.choices[0].message.content?.trim() || "...";
@@ -116,7 +116,7 @@ ${playerMessage}
         { role: "user", content: userPrompt },
       ],
       temperature: 0.3, // 評価の一貫性を保つ
-      max_tokens: 10,
+      max_completion_tokens: 10,
     });
 
     const content = response.choices[0].message.content?.trim() || "50";
@@ -173,7 +173,7 @@ export async function generateFinalComment(
         { role: "user", content: userPrompt },
       ],
       temperature: 0.7,
-      max_tokens: 150,
+      max_completion_tokens: 150,
     });
 
     return (

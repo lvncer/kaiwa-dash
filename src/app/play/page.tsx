@@ -108,7 +108,7 @@ function PlayContent() {
 
   // タイムアウト時の自動送信
   const handleTimeoutSubmit = async () => {
-    if (isLoading || !isTimerActive) return;
+    if (isLoading || !isTimerActive || currentTurn > MAX_TURNS) return;
 
     console.log("[handleTimeoutSubmit] タイムアウトで自動送信", {
       inputMessage,
@@ -198,7 +198,7 @@ function PlayContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!inputMessage.trim() || isLoading || !isTimerActive) return;
+    if (!inputMessage.trim() || isLoading || !isTimerActive || currentTurn > MAX_TURNS) return;
 
     stopTimer();
     const responseTime = (Date.now() - timerStartRef.current) / 1000;
@@ -366,13 +366,13 @@ function PlayContent() {
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             placeholder="あなたの返答を入力..."
-            disabled={isLoading || !isTimerActive}
+            disabled={isLoading || !isTimerActive || currentTurn > MAX_TURNS}
             className="flex-1 rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none disabled:bg-gray-100"
           />
           <button
             type="submit"
             disabled={
-              isLoading || !isTimerActive || !inputMessage.trim()
+              isLoading || !isTimerActive || !inputMessage.trim() || currentTurn > MAX_TURNS
             }
             className="rounded-lg bg-blue-500 px-6 py-2 font-semibold text-white hover:bg-blue-600 disabled:bg-gray-300"
           >

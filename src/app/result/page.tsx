@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import type { Message, TurnScore } from "@/types/game";
 import type { CharacterId, ModeId } from "@/lib/constants/game-config";
 import { finalizeMVPSession } from "@/app/actions/game";
@@ -17,9 +17,13 @@ function ResultContent() {
   const [averageQualityScore, setAverageQualityScore] = useState(0);
   const [comment, setComment] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const hasFinalized = useRef(false);
 
   useEffect(() => {
-    finalizeSession();
+    if (!hasFinalized.current) {
+      hasFinalized.current = true;
+      finalizeSession();
+    }
   }, []);
 
   const finalizeSession = async () => {

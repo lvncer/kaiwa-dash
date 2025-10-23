@@ -50,13 +50,15 @@ Kaiwa Dash は、AI 技術を活用して安全で効果的な会話練習環境
 
 ## 技術スタック
 
-- **フロントエンド**: Next.js 15, React 19, TypeScript
-- **UI Framework**: Tailwind CSS, Shadcn/ui
-- **バックエンド**: Next.js Server Actions
-- **AI/ML**: OpenAI API (GPT-4o-mini)
-- **データ永続化**: LocalStorage / IndexedDB
-- **デプロイ**: Vercel
-- **パッケージマネージャー**: Bun
+| カテゴリ     | 技術                             |
+| ------------ | -------------------------------- |
+| frontend     | Next.js 15, React 19, TypeScript |
+| UI Framework | Tailwind CSS, Shadcn/ui          |
+| Backend      | Next.js Server Actions           |
+| AI/ML        | OpenAI API (GPT-4o-mini)         |
+| データ永続化 | LocalStorage / IndexedDB         |
+| デプロイ     | Vercel                           |
+| ランタイム   | Bun                              |
 
 ### セットアップ/開発コマンド
 
@@ -83,6 +85,11 @@ src/
 - [画面仕様書](./documents/screen-specification.md) - UI/UX 設計詳細
 - [AI 評価設計](./documents/ai-evaluation-design-v2.md) - AI 評価システムの仕様
 - [セットアップガイド](./documents/setup.md) - 詳細な環境構築手順
+
+## デモ
+
+![会話セッション](/public/images/sessions.png)
+![最終評価画面](/public/images/result.png)
 
 ## ライセンス
 
